@@ -55,7 +55,7 @@ class LoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function invalidCredentialsProvider(): array 
+    public function invalidCredentialsProvider(): array
     {
         $user = [
             'email' => 'user@test.com',
@@ -66,7 +66,7 @@ class LoginTest extends TestCase
 
         $final = [];
 
-        foreach($keys as $key) {
+        foreach ($keys as $key) {
             $missing = $user;
 
             unset($missing[$key]);
