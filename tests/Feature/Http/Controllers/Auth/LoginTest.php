@@ -117,7 +117,6 @@ class LoginTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $response->assertSessionHasErrors('email');
-        $this->assertTrue(session()->hasOldInput('email'));
         $this->assertFalse(session()->hasOldInput('password'));
         $this->assertGuest();
     }
@@ -136,7 +135,6 @@ class LoginTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $response->assertSessionHasErrors('email');
-        $this->assertTrue(session()->hasOldInput('email'));
         $this->assertFalse(session()->hasOldInput('password'));
         $this->assertGuest();
     }
@@ -152,7 +150,7 @@ class LoginTest extends TestCase
 
         $response = $this->actingAs($auth_user)->post(route('logout'));
 
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('welcome'));//will maintain this when the welcome page is removed
         $this->assertGuest();
     }
 
@@ -165,7 +163,7 @@ class LoginTest extends TestCase
     {
         $response = $this->post(route('logout'));
 
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('welcome'));//allowing the welcome page to thrive for now
         $this->assertGuest();
     }
 }

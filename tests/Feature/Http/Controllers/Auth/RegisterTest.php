@@ -66,7 +66,7 @@ class RegisterTest extends TestCase
                 $final["Invalid " . $uk] = ['invalid' => $invalid];
 
                 $invalid = $valid;
-                $invalid[$key] = "almost@valid";
+                $invalid[$key] = "1234@1234@@";
 
                 $final["Invalid " . $uk . " 2"] = ['invalid' => $invalid];
             }
@@ -113,15 +113,15 @@ class RegisterTest extends TestCase
         $email = "richard@minisend.com";
         $password = "veryStrongPassword1234";
 
+        //Also an event is dispatched to acknowledge user registered
+        Event::fake();
+
         $response = $this->post(route('register'), [
             'name' => $name,
             'email' => $email,
             'password' => $password,
             'password_confirmation' => $password,
         ]);
-
-        //Also an event is dispatched to acknowledge user registered
-        Event::fake();
 
         $response->assertRedirect(route('home'));
         $users = User::all()->toArray();

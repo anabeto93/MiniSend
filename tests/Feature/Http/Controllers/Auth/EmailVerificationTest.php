@@ -17,7 +17,7 @@ class EmailVerificationTest extends TestCase
      */
     public function guest_cannot_view_verification_notice()
     {
-        $response = $this->get(route('verification.verify'));
+        $response = $this->get(route('verification.notice'));
 
         $response->assertRedirect(route('login'));
     }
@@ -127,7 +127,7 @@ class EmailVerificationTest extends TestCase
         $invalid_route = $this->getInvalidUserVerificationRoute($user);
 
         $response = $this->get($invalid_route);
-        $response->assertForbidden();
+        $response->assertRedirect(route('login'));
     }
 
     /**
