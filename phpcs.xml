@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="MiniSend">
+    <rule ref="PSR1"/>
+    <rule ref="PSR2"/>
+    <file>app/</file>
+    <file>tests/</file>
+    <file>database/factories</file>
+    <exclude-pattern>Javascript</exclude-pattern>
+    <exclude-pattern>.report</exclude-pattern>
+    <exclude-pattern>vendor</exclude-pattern>
+    <exclude-pattern>resources</exclude-pattern>
+    <exclude-pattern>storage/</exclude-pattern>
+    <exclude-pattern>node_modules/</exclude-pattern>
+    <exclude-pattern>database/migrations/</exclude-pattern>
+<!--    <exclude-pattern>database/migrations/2014_10_12_100000_create_password_resets_table.php</exclude-pattern>-->
+    <rule ref="Squiz.PHP.CommentedOutCode">
+        <properties>
+            <property name="maxPercentage" value="35"/>
+        </properties>
+    </rule>
+    <rule ref="PSR2">
+        <exclude name="PSR1.Methods.CamelCapsMethodName"/>
+    </rule>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="160"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+</ruleset>

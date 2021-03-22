@@ -1,0 +1,17 @@
+language: php
+
+php:
+  - 7.4
+
+os: linux
+
+before_script:
+  - sudo mysql -e 'create database laravel;'
+  - composer self-update --2
+  - composer install
+  - cp .env.example .env
+  - php artisan key:generate
+  - php artisan jwt:secret
+
+script:
+  - composer test
