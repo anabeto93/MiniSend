@@ -10,6 +10,7 @@ class LoginTest extends TestCase
 {
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function user_can_view_login_form()
@@ -21,6 +22,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function authenticated_user_cannot_view_login_form()
@@ -34,6 +36,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function user_can_login_using_correct_credentials()
@@ -79,6 +82,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      * @dataProvider invalidCredentialsProvider
      * @param array $payload
@@ -94,6 +98,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function user_cannot_login_with_incorrect_password()
@@ -119,6 +124,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function cannot_login_with_non_existent_email()
@@ -137,6 +143,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function authenticated_user_can_logout()
@@ -151,6 +158,7 @@ class LoginTest extends TestCase
 
     /**
      * @test
+     * @group login
      * @group auth
      */
     public function guest_cannot_logout()

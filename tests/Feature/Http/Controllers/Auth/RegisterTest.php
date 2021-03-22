@@ -11,6 +11,7 @@ class RegisterTest extends TestCase
 {
     /**
      * @test
+     * @group register
      * @group auth
      */
     public function user_can_view_registration_form()
@@ -22,6 +23,7 @@ class RegisterTest extends TestCase
 
     /**
      * @test
+     * @group register
      * @group auth
      */
     public function authenticated_user_cannot_view_registration_form()
@@ -83,6 +85,7 @@ class RegisterTest extends TestCase
 
     /**
      * @test
+     * @group register
      * @group auth
      * @dataProvider invalidUserProvider
      * @param array $payload
@@ -101,6 +104,7 @@ class RegisterTest extends TestCase
 
     /**
      * @test
+     * @group register
      * @group auth
      */
     public function user_can_register()
