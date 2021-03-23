@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -40,4 +41,18 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function generateApiToken(bool $save = true): string
+    {
+        do {
+            $token = Str::random(60);
+        } while (User::where('api_token', $token)->first() instanceof User);
+
+        if ($save) {
+            $this->api_token = $token;
+            $this->save();
+        }
+
+        return $token;
+    }
 }
