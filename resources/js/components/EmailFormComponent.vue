@@ -78,7 +78,7 @@
                 if (this.recipients.length > 3 && this.recipients.trim() !== '') {
                     let recs = this.recipients.split(',')
 
-                    let valid = false
+                    let valid = true
                     let msg = ""
 
                     if (typeof recs == "string") {
@@ -86,7 +86,7 @@
                         msg = "The recipient must be a valid email";
                     } else {
                         for (const i in recs) {
-                            valid = this.validateEmail(recs[i])
+                            valid = this.validateEmail(recs[i].trim())
 
                             msg = "The recipients must be valid emails, separated by commas."
                         }
@@ -101,8 +101,9 @@
             },
             sender(after, before) {
                 if (this.sender.length > 3 && this.sender.trim() !== '') {
+                    let msg = "Sender must be a valid email."
+
                     if (!this.validateEmail(this.sender)) {
-                        let msg = "Sender must be a valid email."
 
                         if (this.validationErrors.length > 0) {
                             let index = this.validationErrors.indexOf(msg)
@@ -155,7 +156,11 @@
                     recipients = [recipients]
                 }
 
-                data.append('recipients[]', recipients)
+                for (const i in recipients) {
+                    console.log("Current Recipient", i, recipients[i])
+                    data.append('recipients[]', recipients[i].trim())
+                }
+
                 data.append('subject', this.subject)
 
                 data.append('_token', $('meta[name="csrf-token"]').attr('content'));
@@ -176,6 +181,8 @@
                     if (response.error_code === 201) {
                         this.success = response.message
                         this.validationErrors = []
+
+                        this.$emit('emailsSent')
 
                         this.emptyForm()
                     }

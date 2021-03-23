@@ -15,7 +15,8 @@ class AddsSentByToEmailsTable extends Migration
     {
         Schema::table('emails', function (Blueprint $table) {
             $table->unsignedBigInteger('sent_by');
-            $table->foreign('sent_by')->references('id')->on('users');
+            $table->foreign('sent_by')->references('id')->on('users')
+            ->onDelete('CASCADE');
         });
     }
 
@@ -27,6 +28,7 @@ class AddsSentByToEmailsTable extends Migration
     public function down()
     {
         Schema::table('emails', function (Blueprint $table) {
+            $table->dropForeign('emails_sent_by_foreign');
             $table->dropColumn(['sent_by']);
         });
     }

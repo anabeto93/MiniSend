@@ -10,6 +10,7 @@ use App\Models\Email;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -61,7 +62,6 @@ class EmailService
                 $temp = Email::create($props);
 
                 $emails[$i] = $temp;
-
                 $jobs[] = new SendEmailJob($props['uuid']);
             }
 
@@ -74,6 +74,9 @@ class EmailService
             DB::commit();
         } catch (\Exception|\Throwable $e) {
             DB::rollBack();
+
+            //delete the files as well
+            $this->deleteAttachments($attachments);
 
             $error = [];
 
@@ -165,5 +168,22 @@ class EmailService
         }
 
         return array_values($names);
+    }
+
+    private function deleteAttachments(array $files): void
+    {
+        try {
+            foreach ($files as $file) {
+                $path = "attachments/" . $file;
+
+                Storage::delete($path);
+            }
+        } catch (\Exception|\Throwable $e) {
+            Log::error("::EMAIL_SERVICE:: Failed Deleting Attachment", [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+        }
     }
 }

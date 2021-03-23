@@ -18,7 +18,12 @@ class Email extends Model
     public function getAttachmentsAttribute($value)
     {
         if ($value) {
-            return json_decode($value, true);
+            $value = json_decode($value, true);
+
+            if (is_string($value)) {
+                //just once more
+                $value = json_decode($value, true);
+            }
         }
 
         return $value;

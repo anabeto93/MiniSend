@@ -162,9 +162,11 @@ class SendEmailControllerTest extends TestCase
     {
         $user = User::factory()->create([ 'email' => 'auth@user.com' ]);
 
-        $valid = Email::factory()->make([ 'from' => $user->email, 'attachments' => null,])->toArray();
+        $valid = Email::factory()->make([ 'from' => $user->email, 'attachments' => ['hello.txt'],])->toArray();
+
         $valid['sender'] = $user->email;
         $valid['recipients'] = [ $valid['to'], ];
+        unset($valid['attachments']);
 
         Storage::fake();
 
@@ -217,5 +219,83 @@ class SendEmailControllerTest extends TestCase
         Bus::assertDispatched(SendEmailJob::class, function ($job) use ($email) {
             return $job->email_id === $email->uuid;
         });
+    }
+
+    /**
+     * @test
+     * @group send_email
+     */
+    public function email_status_is_updated_when_delivered_or_failed()
+    {
+        $user = User::factory()->create([ 'email' => 'auth@user.com' ]);
+
+        $valid = Email::factory()->make([ 'from' => $user->email, ])->toArray();
+        $valid['sender'] = $user->email;
+        $valid['recipients'] = [ $valid['to'], ];
+        unset($valid['status']);
+        unset($valid['attachments']);
+
+        $response = $this->from(route('home'))->actingAs($user, 'api')->json('POST', route('emails.send'), $valid);
+
+        $response->assertStatus(201)->assertJsonStructure([
+            'status', 'message', 'error_code', 'data' => [],
+        ]);
+
+        $email = Email::where('from', $user->email)->first();
+        $this->assertNotEquals('POSTED', $email->status);
+        $this->assertEquals('SENT', $email->status);
+    }
+
+    /**
+     * @test
+     * @group send_email
+     */
+    public function only_the_number_of_emails_matching_recipients_are_sent()
+    {
+        $user = User::factory()->create([ 'email' => 'auth@user.com' ]);
+
+        $valid = Email::factory()->make([ 'from' => $user->email, 'attachments' => ['hello.txt'],])->toArray();
+
+        $recipients = ['first@there.com', 'second@there.com'];
+
+        $valid['sender'] = $user->email;
+        $valid['recipients'] = $recipients; //two recipients
+        unset($valid['attachments']);
+
+        Storage::fake();
+
+        $valid['attachments'] = [
+            UploadedFile::fake()->create('file_' . rand(1, 100) . ".csv"),
+            UploadedFile::fake()->create('file_' . rand(1, 100) . ".pdf"),
+            UploadedFile::fake()->create('file_' . rand(1, 100) . ".png"),
+        ];
+
+        $response = $this->from(route('home'))->actingAs($user, 'api')->json('POST', route('emails.send'), $valid);
+
+        $response->assertStatus(201)->assertJsonStructure([
+            'status', 'message', 'error_code', 'data' => [],
+        ]);
+
+        $emails = Email::all()->toArray();
+
+        $this->assertCount(count($recipients), $emails);
+        $this->assertEquals($user->email, $emails[0]['from']);
+
+        $attachments = [];
+
+        foreach ($valid['attachments'] as $attachment) {
+            $timestamp = $timestamp = implode("_", explode("-", str_replace(" ", "-", str_replace(":", "-", now()->toDateTimeString()))));
+            $name = $timestamp . "_" . $attachment->getClientOriginalName();
+            $attachments[] = $name;
+
+            Storage::assertExists('attachments/' . $name);
+        }
+
+        foreach ($recipients as $recipient) {
+            $client_email = Email::where('to', $recipient)->first();
+
+            $this->assertEquals($attachments, $client_email->attachments);
+            $this->assertEquals($user->email, $client_email->from);
+        }
     }
 }
