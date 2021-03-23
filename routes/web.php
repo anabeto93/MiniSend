@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ViewEmailController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -20,3 +21,7 @@ Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
 Auth::routes([ 'verify' => true, ]);
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('emails/{email}', ViewEmailController::class)->name('emails.show');
+});
