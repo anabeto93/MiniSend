@@ -40,6 +40,7 @@ class EmailService
                     'text_content' => $emailDto->text_content,
                     'html_content' => $emailDto->html_content,
                     'attachments' => $attachments ? json_encode($attachments) : null,
+                    'sent_by' => auth()->id(),
                 ];
 
                 $temp = Email::create($props);
@@ -105,6 +106,8 @@ class EmailService
     {
         $query = Email::query();
 
+        $query->where('sent_by', auth()->id());
+
         if ($search->subject) {
             $query->where('subject', 'like', '%' . $search->subject . '%');
         }
@@ -140,7 +143,7 @@ class EmailService
                 $timestamp = implode("_", explode("-", str_replace(" ", "-", str_replace(":", "-", now()->toDateTimeString()))));
                 $name = $timestamp . "_" . $fn . "." . $ex;
 
-                $file->storeAs(storage_path('attachments'), $name);
+                $file->storeAs('attachments', $name);
 
                 $names[] = $name;
             }

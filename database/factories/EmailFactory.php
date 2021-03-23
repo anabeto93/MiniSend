@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Email;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,9 @@ class EmailFactory extends Factory
             'text_content' => $this->faker->paragraph,
             'html_content' => $this->faker->randomHtml(),
             'attachments' => json_encode([]),
+            'sent_by' => function () {
+                return User::factory()->create()->id;
+            }
         ];
     }
 }

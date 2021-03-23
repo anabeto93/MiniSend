@@ -187,7 +187,7 @@ class SendEmailControllerTest extends TestCase
             $timestamp = $timestamp = implode("_", explode("-", str_replace(" ", "-", str_replace(":", "-", now()->toDateTimeString()))));
             $name = $timestamp . "_" . $attachment->getClientOriginalName();
 
-            Storage::assertExists(storage_path('attachments') . '/' . $name);
+            Storage::assertExists('attachments/' . $name);
         }
     }
 

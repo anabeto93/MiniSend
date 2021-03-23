@@ -66,6 +66,7 @@ class SearchEmailsControllerTest extends TestCase
 
         $existing_emails = Email::factory()->count(5)->create([
             'to' => $recipient,
+            'sent_by' => $user->id,
         ]);
 
         $route = route('emails.search', ['recipient' => $recipient]);
@@ -89,6 +90,7 @@ class SearchEmailsControllerTest extends TestCase
 
         $existing_emails = Email::factory()->count(5)->create([
             'from' => $recipient,
+            'sent_by' => $user->id,
         ]);
 
         $route = route('emails.search', ['sender' => $recipient]);
@@ -114,6 +116,7 @@ class SearchEmailsControllerTest extends TestCase
         $existing_emails = Email::factory()->count(5)->create([
             'from' => $recipient,
             'subject' => $common_subject,
+            'sent_by' => $user->id,
         ]);
 
         $route = route('emails.search', ['subject' => $common_subject]);
@@ -159,6 +162,7 @@ class SearchEmailsControllerTest extends TestCase
             'to' => $recipient,
             'subject' => $subject,
             'from' => $sender,
+            'sent_by' => $user->id,
         ]);
 
         $params = [];
@@ -183,5 +187,30 @@ class SearchEmailsControllerTest extends TestCase
         ]);
 
         $this->assertCount($count, $response->json('data.emails'));
+    }
+
+    /**
+     * @test
+     * @group search_emails
+     */
+    public function user_can_only_search_emails_they_sent()
+    {
+        $user = User::factory()->create();
+        $recipient = "test@user.com";
+        $common_subject = "Sweet Caroline";
+
+        $existing_emails = Email::factory()->count(5)->create([
+            'from' => $recipient,
+            'subject' => $common_subject,
+            'sent_by' => User::factory()->create()->id,
+        ]);
+
+        $route = route('emails.search', ['subject' => $common_subject]);
+
+        $response = $this->actingAs($user, 'api')->json('GET', $route);
+
+        $response->assertStatus(404)->assertJsonStructure([
+            'status', 'message', 'error_code',
+        ]);
     }
 }

@@ -28,10 +28,10 @@ class CreateEmailFormRequest extends FormRequest
             'recipients' => ['bail', 'required', 'array'],
             'recipients.*' => ['required', 'string', 'email',],
             'subject' => ['bail', 'required', 'string', 'min:2', 'max:100'],
-            'text_content' => ['sometimes', 'required_without:html_content', 'string', 'max:1500',],
-            'html_content' => ['sometimes', 'required_without:text_content',],
+            'text_content' => ['required_without:html_content', 'string', 'max:1500',],
+            'html_content' => ['required_without:text_content',],
             'attachments' => ['sometimes', 'array',],
-            'attachments.*' => ['required_with:attachments', 'mimes:csv,txt,xls,xlsx,doc,docx,pdf,jpeg,png,jpg', 'max:4096'],
+            'attachments.*' => ['required_with:attachments', 'file', 'mimes:csv,txt,xls,xlsx,doc,docx,pdf,jpeg,png,jpg', 'max:4096'],
         ];
     }
 

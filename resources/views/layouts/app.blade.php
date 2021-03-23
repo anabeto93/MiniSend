@@ -18,6 +18,7 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @stack('styles')
 </head>
 <body>
     <div id="app">
@@ -33,7 +34,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-
+                        <search-email></search-email>
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -45,7 +46,7 @@
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
-                            
+
                             @if (Route::has('register'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
@@ -80,4 +81,14 @@
         </main>
     </div>
 </body>
+{{--<script type="text/javascript">--}}
+{{--    $(document).ready(function () {--}}
+{{--        $.ajaxSetup({--}}
+{{--            headers: {--}}
+{{--                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')--}}
+{{--            }--}}
+{{--        });--}}
+{{--    });--}}
+{{--</script>--}}
+@stack('scripts')
 </html>
