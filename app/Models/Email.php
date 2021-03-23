@@ -10,4 +10,17 @@ class Email extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected $casts = [
+        'attachments' => 'array',
+    ];
+
+    public function getAttachmentsAttribute($value)
+    {
+        if ($value) {
+            return json_decode($value, true);
+        }
+
+        return $value;
+    }
 }

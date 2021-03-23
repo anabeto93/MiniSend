@@ -15,6 +15,21 @@ use Illuminate\Support\Str;
 
 class EmailService
 {
+    public function all(): ServiceResponse
+    {
+        $per_page = (int)(request()->get('per_page') ?: 5);
+
+        $emails = Email::paginate($per_page);
+
+        if ($emails->count() == 0) {
+            return new ServiceResponse('Success', 'No emails found.', 404);
+        }
+
+        return new ServiceResponse('Success', 'Emails found.', 200, [
+            'emails' => $emails
+        ]);
+    }
+
     public function create(CreateEmailDto $emailDto): ServiceResponse
     {
         DB::beginTransaction();

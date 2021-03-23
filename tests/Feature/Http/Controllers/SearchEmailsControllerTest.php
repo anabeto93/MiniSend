@@ -213,4 +213,20 @@ class SearchEmailsControllerTest extends TestCase
             'status', 'message', 'error_code',
         ]);
     }
+
+    /**
+     * @test
+     * @group search_emails
+     */
+    public function only_authenticated_user_can_see_the_search_input()
+    {
+        $response = $this->get(route('welcome'));
+
+        $response->assertDontSee("search-email");
+
+        //but an authenticated user does
+        $user = User::factory()->create();
+        $response = $this->actingAs($user)->get(route('home'));
+        $response->assertSee("search-email");
+    }
 }

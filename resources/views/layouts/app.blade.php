@@ -34,7 +34,9 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
+                        @auth
                         <search-email></search-email>
+                        @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -81,14 +83,5 @@
         </main>
     </div>
 </body>
-{{--<script type="text/javascript">--}}
-{{--    $(document).ready(function () {--}}
-{{--        $.ajaxSetup({--}}
-{{--            headers: {--}}
-{{--                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')--}}
-{{--            }--}}
-{{--        });--}}
-{{--    });--}}
-{{--</script>--}}
 @stack('scripts')
 </html>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FetchEmailsController;
 use App\Http\Controllers\SearchEmailsController;
 use App\Http\Controllers\SendEmailController;
 use App\Http\Controllers\ViewEmailController;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'emails', 'middleware' => ['auth:api']], function () {
     Route::post('/', SendEmailController::class)->name('emails.send');
-    Route::get('/', SearchEmailsController::class)->name('emails.search');
+    Route::get('/', FetchEmailsController::class)->name('emails.index');
+    Route::get('search', SearchEmailsController::class)->name('emails.search');
     Route::get('/{email}', ViewEmailController::class)->name('api.emails.show');
 });

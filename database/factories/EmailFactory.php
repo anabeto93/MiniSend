@@ -30,7 +30,7 @@ class EmailFactory extends Factory
             'subject' => $this->faker->sentence,
             'text_content' => $this->faker->paragraph,
             'html_content' => $this->faker->randomHtml(),
-            'attachments' => json_encode([]),
+            'attachments' => null,
             'sent_by' => function () {
                 return User::factory()->create()->id;
             }
