@@ -14,7 +14,9 @@
 </template>
 
 <script>
-    module.exports = {
+    import { mapGetters, mapActions, mapMutations } from 'vuex';
+
+    export default {
         props: ['api_token'],
         data() {
             return {
@@ -28,25 +30,22 @@
             keyword: {
                 handler: _.debounce(function() {
                     if (this.keyword.length > 0) {
-
                         this.getOtherParameters()
                         this.searchEmails();
                     }
                 }, 100)
             }
         },
+        created() {
+            localStorage.setItem('user_api_token', this.api_token)
+            this.setAuthToken({
+                api_token: this.api_token,
+                csrf_token: $('meta[name="csrf-token"]').attr('content'),
+            })
+        },
         methods: {
-
-            getHeaders() {
-                return {
-                    headers: {
-                        'content-type': 'application/json',
-                        'accept': 'application/json',
-                        'Authorization': 'Bearer ' + this.api_token,
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                };
-            },
+            ...mapMutations({ setAuthToken: "SET_AUTH_TOKENS" }),
+            ...mapActions({ findEmails: "SEARCH_EMAILS" }),
             searchEmails() {
                 console.log("Searching emails for " + this.keyword)
                 let link = 'api/emails/search'
@@ -71,16 +70,7 @@
                     }
                 }
 
-                axios.get(link, this.getHeaders())
-                    .then((res) => {
-                        console.log("Response from Search", res.data)
-
-                        this.$emit('emailsUpdated', res.data.data.emails);
-                    })
-                    .catch((err) => {
-                        console.log("Error searching emails", err.response.data)
-                        this.$emit('apiErrors', err.response.data);
-                    })
+                this.findEmails(link)
             },
             getOtherParameters() {
                 let keyword = (' ' + this.keyword).slice(1) //safe copy

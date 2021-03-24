@@ -12,27 +12,27 @@
         <form @submit="createEmail" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="sender">Sender</label>
-                <input type="email" v-model="sender" class="form-control" id="sender" name="sender" aria-describedby="senderHelp" placeholder="Enter email">
+                <input type="email" v-model="emailForm.sender" class="form-control" id="sender" name="sender" aria-describedby="senderHelp" placeholder="Enter email">
                 <small id="senderHelp" class="form-text text-muted">You can leave it blank to originate from you.</small>
             </div>
             <div class="form-group">
                 <label for="subject">Subject</label>
-                <input type="text" v-model="subject" class="form-control" id="subject" name="subject" aria-describedby="subjectHelp" placeholder="Enter Subject" required>
+                <input type="text" v-model="emailForm.subject" class="form-control" id="subject" name="subject" aria-describedby="subjectHelp" placeholder="Enter Subject" required>
                 <small id="subjectHelp" class="form-text text-muted">Subject of the email.</small>
             </div>
             <div class="form-group">
                 <label for="recipients">Recipient(s)</label>
-                <input type="text" v-model="recipients" class="form-control" id="recipients" name="recipients" aria-describedby="recipientHelp" placeholder="Enter recipient emails" required>
+                <input type="text" v-model="emailForm.recipients" class="form-control" id="recipients" name="recipients" aria-describedby="recipientHelp" placeholder="Enter recipient emails" required>
                 <small id="recipientHelp" class="form-text text-muted">Enter recipients separated by commas <b>,</b></small>
             </div>
             <div class="form-group">
                 <label for="text_content">Text Content</label>
-                <textarea class="form-control" name="text_content" v-model="text_content" id="text_content" cols="30" rows="3"  aria-describedby="textHelp" placeholder="Enter text content." required></textarea>
+                <textarea class="form-control" name="text_content" v-model="emailForm.text_content" id="text_content" cols="30" rows="3"  aria-describedby="textHelp" placeholder="Enter text content." required></textarea>
                 <small id="textHelp" class="form-text text-muted">Leave blank if sending HTML content.</small>
             </div>
             <div class="form-group">
                 <label for="text_content">HTML Content</label>
-                <textarea class="form-control" name="html_content" v-model="html_content" id="html_content" cols="30" rows="5"  aria-describedby="htmlHelp" placeholder="Enter HTML content." required></textarea>
+                <textarea class="form-control" name="html_content" v-model="emailForm.html_content" id="html_content" cols="30" rows="5"  aria-describedby="htmlHelp" placeholder="Enter HTML content." required></textarea>
                 <small id="htmlHelp" class="form-text text-muted">Leave blank if sending Text content.</small>
             </div>
             <div class="form-group">
@@ -45,38 +45,34 @@
 </template>
 
 <script>
-    module.exports = {
-        props: ['api_token'],
-        data() {
-            return {
-                sender: null,
-                subject: null,
-                recipients: null,
-                text_content: null,
-                html_content: null,
-                attachments: null,
-                success: '',
-                validationErrors: []
-            }
+    import { mapActions, mapGetters, mapMutations } from 'vuex';
+
+    export default {
+        computed: {
+            ...mapGetters({
+                success: "GET_SUCCESS_MESSAGE",
+                validationErrors: "GET_ERRORS",
+                emailForm: "GET_CURRENT_EMAIL"
+            })
         },
         watch: {
-            text_content(after, before) {
-                if (this.text_content.length > 0 && this.text_content.trim() !== 0) {
+            'emailForm.text_content': function (after, before) {
+                if (this.emailForm.text_content.length > 0 && this.emailForm.text_content.trim() !== 0) {
                     $('#html_content').removeAttr('required').prop('required', false)
                 } else {
                     $('#html_content').prop('required', true)
                 }
             },
-            html_content(after, before) {
-                if (this.html_content.length > 0 && this.html_content.trim() !== '') {
+            'emailForm.html_content': function (after, before) {
+                if (this.emailForm.html_content.length > 0 && this.emailForm.html_content.trim() !== '') {
                     $('#text_content').removeAttr('required').prop('required', false);
                 } else {
                     $('#text_content').prop('required', true)
                 }
             },
-            recipients(after, before) {
-                if (this.recipients.length > 3 && this.recipients.trim() !== '') {
-                    let recs = this.recipients.split(',')
+            'emailForm.recipients': function (after, before) {
+                if (this.emailForm.recipients.length > 3 && this.emailForm.recipients.trim() !== '') {
+                    let recs = this.emailForm.recipients.split(',')
 
                     let valid = true
                     let msg = ""
@@ -93,44 +89,46 @@
                     }
 
                     if (!valid) {
-                        this.validationErrors = [ msg ];
+                        this.setErrors([ msg ])
                     } else {
-                        this.validationErrors = []
+                        this.setErrors([])
                     }
                 }
             },
-            sender(after, before) {
-                if (this.sender.length > 3 && this.sender.trim() !== '') {
+            'emailForm.sender': function (after, before) {
+                if (this.emailForm.sender.length > 3 && this.emailForm.sender.trim() !== '') {
                     let msg = "Sender must be a valid email."
 
-                    if (!this.validateEmail(this.sender)) {
+                    if (!this.validateEmail(this.emailForm.sender)) {
 
                         if (this.validationErrors.length > 0) {
                             let index = this.validationErrors.indexOf(msg)
 
                             if (index < 0) this.validationErrors.push(msg)
                         } else {
-                            this.validationErrors = [msg];
+                            this.setErrors([ msg ])
                         }
                     } else {
                         let index = this.validationErrors.indexOf(msg)
 
                         if (this.validationErrors.length === 1 && index === 0) {
-                            this.validationErrors = []
+                            this.setErrors([])
                         }
                     }
                 }
             }
         },
         methods: {
+            ...mapActions({ sendEmail: "SEND_EMAIL" }),
+            ...mapMutations({ setErrors: "SET_API_ERRORS", updateForm: "SET_EMAIL_PROPERTIES" }),
             createEmail(event) {
                 event.preventDefault();
 
                 let data = new FormData();
-                let sender = this.sender;
-                let text_content = this.text_content;
-                let html_content = this.html_content;
-                let attachments = this.attachments
+                let sender = this.emailForm.sender;
+                let text_content = this.emailForm.text_content;
+                let html_content = this.emailForm.html_content;
+                let attachments = this.emailForm.attachments
 
                 if (sender !== null && (typeof sender == "string" && sender.trim() !== '')) {
                     data.append('sender', sender);
@@ -150,7 +148,7 @@
                     }
                 }
 
-                let recipients = this.recipients.split(',')
+                let recipients = this.emailForm.recipients.split(',')
 
                 if (typeof recipients == "string") {
                     recipients = [recipients]
@@ -160,61 +158,21 @@
                     data.append('recipients[]', recipients[i].trim())
                 }
 
-                data.append('subject', this.subject)
+                data.append('subject', this.emailForm.subject)
 
                 data.append('_token', $('meta[name="csrf-token"]').attr('content'));
 
-                const config = {
-                    headers: {
-                        'content-type': 'multipart/form-data',
-                        'accept': 'application/json',
-                        'Authorization': 'Bearer ' + this.api_token,
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                }
-
-                axios.post('/api/emails', data, config)
-                .then((res) => {
-                    let response = res.data
-
-                    if (response.error_code === 201) {
-                        this.success = response.message
-                        this.validationErrors = []
-
-                        this.$emit('emailsSent')
-
-                        this.emptyForm()
-                    }
-                }).catch((err) => {
-                    let errors = err.response.data
-                    console.log('errors', err.response.data)
-
-                    if (errors.error_code === 422) {
-                        let e = [];
-
-                        for (i in errors.data.errors) {
-                            e.push(errors.data.errors[i][0])
-                        }
-
-                        this.validationErrors = e
-                    }
-                })
+                this.sendEmail(data)
             },
             addFile(event) {
-                this.attachments = event.target.files
+                console.log("changing file")
+                this.updateForm({
+                    attachments: event.target.files
+                })
+                console.log("Form Afterwards", this.emailForm)
             },
             validateEmail(value) {
                 return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value);
-            },
-            emptyForm() {
-                this.sender = ''
-                this.subject = ''
-                this.recipients = ''
-                this.text_content = ''
-                this.html_content = ''
-                this.attachments = ''
-
-                $('#attachments').prop('value', '')
             }
         }
     }

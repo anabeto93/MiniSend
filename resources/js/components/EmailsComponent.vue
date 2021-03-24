@@ -31,63 +31,19 @@
 </template>
 
 <script>
-    module.exports = {
-        props: ['api_token'],
-        data: function() {
-            return {
-                emails: [],
-                currentMail: {
-                    uuid: '',
-                    sender: '',
-                    recipient: '',
-                    subject: '',
-                    attachments: null,
-                    content: ''//could be html or text content, either one is fine
-                },
-                pagination: {}
-            }
-        },
+    import { mapActions, mapGetters } from 'vuex';
+
+    export default {
         created() {
-            this.getEmails();
+            setTimeout(() => {
+                this.getEmails();
+            }, 200)
         },
-        mounted() {
-            console.log("Mounted Emails")
+        computed: {
+            ...mapGetters({ emails: "GET_EMAILS", pagination: "GET_PAGINATION" })
         },
         methods: {
-            getHeaders() {
-                return {
-                    headers: {
-                        'content-type': 'application/json',
-                        'accept': 'application/json',
-                        'Authorization': 'Bearer ' + this.api_token,
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                };
-            },
-            getEmails(url) {
-                let link = url || 'api/emails'
-                axios.get(link, this.getHeaders())
-                    .then((res) => {
-                        let response = res.data.data.emails
-                        console.log('Response from fetching emails', response)
-                        this.emails = response.data
-
-                        this.makePagination(response)
-                    })
-                .catch((err) => {
-                    console.log("Error fetching emails", err.response.data)
-                    this.$emit('apiErrors', err.response.data);
-                })
-            },
-            makePagination(response) {
-                this.pagination = {
-                    current_page: response.current_page,
-                    last_page: response.last_page,
-                    next_page_url: response.next_page_url,
-                    prev_page_url: response.prev_page_url,
-                    total: response.total,
-                }
-            },
+            ...mapActions({ getEmails: "FETCH_EMAILS" }),
             viewEmailDetails(email_id) {
                 let url = "/emails/" + email_id;
 
