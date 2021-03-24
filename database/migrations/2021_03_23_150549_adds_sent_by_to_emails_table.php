@@ -14,9 +14,14 @@ class AddsSentByToEmailsTable extends Migration
     public function up()
     {
         Schema::table('emails', function (Blueprint $table) {
-            $table->unsignedBigInteger('sent_by');
-            $table->foreign('sent_by')->references('id')->on('users')
-            ->onDelete('CASCADE');
+            $column = $table->unsignedBigInteger('sent_by');
+
+            if (config('database.default') == 'sqlite') {
+                $column->nullable();//this is a hack, cos of how sqlite treats added columns
+            }
+
+            $table->foreign('sent_by')->references('id')
+                ->on('users')->onDelete('CASCADE');
         });
     }
 
