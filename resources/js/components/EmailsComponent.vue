@@ -57,7 +57,7 @@
             getHeaders() {
                 return {
                     headers: {
-                        'content-type': 'multipart/form-data',
+                        'content-type': 'application/json',
                         'accept': 'application/json',
                         'Authorization': 'Bearer ' + this.api_token,
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -76,7 +76,7 @@
                     })
                 .catch((err) => {
                     console.log("Error fetching emails", err.response.data)
-                    this.$emit('apiErrors');
+                    this.$emit('apiErrors', err.response.data);
                 })
             },
             makePagination(response) {

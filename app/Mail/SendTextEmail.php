@@ -38,8 +38,7 @@ class SendTextEmail extends Mailable
 
         if (is_array($email->attachments) && count($email->attachments) > 0) {
             foreach ($email->attachments as $file) {
-                $name = "attachments/" . $file;
-                $mail->attachFromStorage($name, $file);
+                $mail->attachFromStorage($file, $file);
             }
         }
 

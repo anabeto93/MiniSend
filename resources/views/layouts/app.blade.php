@@ -35,7 +35,7 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
                         @auth
-                        <search-email></search-email>
+                        <search-email api_token="{{ auth()->user()->api_token }}"></search-email>
                         @endauth
                     </ul>
 

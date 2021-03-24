@@ -221,11 +221,22 @@ class SendEmailControllerTest extends TestCase
         });
     }
 
+    public function emailContentTypeProvider(): array
+    {
+        return [
+            'Text Content' => ['text' => true, 'content' => false,],
+            'Html Content' => ['text' => false, 'content' => true,],
+        ];
+    }
+
     /**
      * @test
      * @group send_email
+     * @dataProvider emailContentTypeProvider
+     * @param bool $using_text
+     * @param bool $using_html
      */
-    public function email_status_is_updated_when_delivered_or_failed()
+    public function email_status_is_updated_when_delivered_or_failed(bool $using_text, bool $using_html)
     {
         $user = User::factory()->create([ 'email' => 'auth@user.com' ]);
 
@@ -234,6 +245,20 @@ class SendEmailControllerTest extends TestCase
         $valid['recipients'] = [ $valid['to'], ];
         unset($valid['status']);
         unset($valid['attachments']);
+
+        if ($using_html) {
+            unset($valid['text_content']);
+        }
+
+        if ($using_text) {
+            unset($valid['html_content']);
+        }
+
+        Storage::fake();
+
+        $valid['attachments'] = [
+            UploadedFile::fake()->create('file_' . rand(1, 100) . ".csv"),
+        ];
 
         $response = $this->from(route('home'))->actingAs($user, 'api')->json('POST', route('emails.send'), $valid);
 
@@ -285,10 +310,10 @@ class SendEmailControllerTest extends TestCase
 
         foreach ($valid['attachments'] as $attachment) {
             $timestamp = $timestamp = implode("_", explode("-", str_replace(" ", "-", str_replace(":", "-", now()->toDateTimeString()))));
-            $name = $timestamp . "_" . $attachment->getClientOriginalName();
+            $name = 'attachments/' . $timestamp . "_" . $attachment->getClientOriginalName();
             $attachments[] = $name;
 
-            Storage::assertExists('attachments/' . $name);
+            Storage::assertExists($name);
         }
 
         foreach ($recipients as $recipient) {

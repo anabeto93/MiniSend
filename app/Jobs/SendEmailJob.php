@@ -9,9 +9,13 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Mail\Message;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SendEmailJob implements ShouldQueue
 {
@@ -42,7 +46,22 @@ class SendEmailJob implements ShouldQueue
             if ($email->text_content) {
                 Mail::to($email->to)->send(new SendTextEmail($email));
             } else {
+                Mail::send([], [], function ($message) use ($email) {
+                    $mail = $message->to($email->to)
+                        ->from($email->from)
+                        ->subject($email->subject);
 
+                    if (is_array($email->attachments) && count($email->attachments) > 0) {
+                        foreach ($email->attachments as $file) {
+                            $mail->attach(Storage::path($file), [
+                                'as' => $file,
+                                'mime' => Storage::mimeType($file),
+                            ]);
+                        }
+                    }
+
+                    $mail->setBody($email->html_content, 'text/html');
+                });
             }
 
             $email->update([
@@ -50,6 +69,12 @@ class SendEmailJob implements ShouldQueue
             ]);
         } catch (\Exception|\Throwable $e) {
             //regardless of the error, fail it
+            Log::error("::SEND_EMAIL_JOB:: Error Sending Mail", [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
             $email->update([
                 'status' => 'FAILED'
             ]);

@@ -39,7 +39,7 @@ class CreateEmailFormRequest extends FormRequest
     {
         $content = [];
 
-        foreach (['text_content', 'subject', 'text_content', 'html_content'] as $key) {
+        foreach (['text_content', 'subject',] as $key) {
             if ($this->has($key)) {
                 $content[$key] = strip_tags($this->input($key));
             }

@@ -157,7 +157,6 @@
                 }
 
                 for (const i in recipients) {
-                    console.log("Current Recipient", i, recipients[i])
                     data.append('recipients[]', recipients[i].trim())
                 }
 

@@ -20,7 +20,7 @@ class EmailService
     {
         $per_page = (int)(request()->get('per_page') ?: 5);
 
-        $emails = Email::paginate($per_page);
+        $emails = Email::latest()->paginate($per_page);
 
         if ($emails->count() == 0) {
             return new ServiceResponse('Success', 'No emails found.', 404);
@@ -68,7 +68,9 @@ class EmailService
             if (count($jobs) == 1) {
                 dispatch($jobs[0])->delay(now()->addSeconds(2));
             } else {
-                Bus::batch($jobs)->dispatch();
+                dispatch(function () use ($jobs) {
+                    Bus::batch($jobs)->dispatch();
+                })->delay(now()->addSeconds(2));
             }
 
             DB::commit();
@@ -159,9 +161,16 @@ class EmailService
                 $fn = pathinfo($fEx, PATHINFO_FILENAME);
                 $ex = $file->getClientOriginalExtension();
                 $timestamp = implode("_", explode("-", str_replace(" ", "-", str_replace(":", "-", now()->toDateTimeString()))));
-                $name = $timestamp . "_" . $fn . "." . $ex;
+                $name = trim($timestamp . "_" . $fn);
 
-                $file->storeAs('attachments', $name);
+                //replace all spaces with _, all - with _ and so on
+                foreach ([' ', '-', '.', '(', ')'] as $term) {
+                    $name = str_replace($term, "_", $name);
+                }
+
+                $name = $name . "." . $ex;
+
+                $name = $file->storeAs('attachments', $name);
 
                 $names[] = $name;
             }
@@ -174,9 +183,7 @@ class EmailService
     {
         try {
             foreach ($files as $file) {
-                $path = "attachments/" . $file;
-
-                Storage::delete($path);
+                Storage::delete($file);
             }
         } catch (\Exception|\Throwable $e) {
             Log::error("::EMAIL_SERVICE:: Failed Deleting Attachment", [
